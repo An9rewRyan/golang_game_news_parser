@@ -4,10 +4,13 @@ import (
 	"fmt"
 	"parser/root_structs"
 	"strings"
+	"sync"
 
 	"github.com/antchfx/htmlquery"
 	"golang.org/x/net/html"
 )
+
+var wg sync.WaitGroup
 
 func Get_links(site_link string, site_paths root_structs.Article_paths) []string {
 	var links []string
@@ -19,6 +22,7 @@ func Get_links(site_link string, site_paths root_structs.Article_paths) []string
 	for _, link := range links_hex {
 		links = append(links, htmlquery.SelectAttr(link, "href"))
 	}
+	wg.Add(len(links))
 	return links
 }
 
@@ -26,12 +30,14 @@ func Get_articles(site_link string, site_paths root_structs.Article_paths) []roo
 	var articles []root_structs.Article
 	links := Get_links(site_link, site_paths)
 	for _, link := range links {
-		articles = append(articles, Get_article(link, site_paths))
+		go Get_article(link, site_paths)
 	}
+	wg.Wait()
 	return articles
 }
 
 func Get_article(link string, site_paths root_structs.Article_paths) root_structs.Article {
+	defer wg.Done()
 	article_html, err := htmlquery.LoadURL(link)
 	if err != nil {
 		fmt.Println(err)
@@ -43,6 +49,7 @@ func Get_article(link string, site_paths root_structs.Article_paths) root_struct
 		Author:    Get_element_by_xpath(article_html, site_paths.Author_xpath, "author"),
 		Pub_date:  Get_element_by_xpath(article_html, site_paths.Pub_date_xpath, "pub_date"),
 	}
+	fmt.Println(article)
 	return article
 }
 
