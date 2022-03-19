@@ -73,6 +73,7 @@ func Get_article(link string, site_paths root_structs.Article_paths) root_struct
 		if err != nil {
 			fmt.Println("An error occured while reading htmlfile on " + link)
 		}
+		fmt.Println(Get_element_by_xpath(article_html, site_paths.Error_code_xpath, "text"), "retrying to get"+link)
 		time.Sleep(2 * time.Second)
 	}
 	var article = root_structs.Article{}
