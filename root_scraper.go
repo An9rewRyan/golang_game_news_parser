@@ -3,14 +3,31 @@ package main
 import (
 	"fmt"
 	"parser/root_structs"
+	"regexp"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/antchfx/htmlquery"
 	"golang.org/x/net/html"
 )
 
+// var wg sync.WaitGroup
+
+const MAX = 10
+
 var wg sync.WaitGroup
+
+var channel = make(chan int, MAX)
+
+// var article_channel = make(chan root_structs.Article)
+
+func add_domain_name(link string, site_paths root_structs.Article_paths) string {
+	re := regexp.MustCompile("//.*?/")
+	match := re.FindStringSubmatch(site_paths.Site_link)
+	domain_name := match[0]
+	return "https:" + domain_name + link
+}
 
 func Get_links(site_link string, site_paths root_structs.Article_paths) []string {
 	var links []string
@@ -22,15 +39,29 @@ func Get_links(site_link string, site_paths root_structs.Article_paths) []string
 	for _, link := range links_hex {
 		links = append(links, htmlquery.SelectAttr(link, "href"))
 	}
-	wg.Add(len(links))
+	// wg.Add(len(links))
+	fmt.Println("links!!", links, len(links))
 	return links
 }
 
 func Get_articles(site_link string, site_paths root_structs.Article_paths) []root_structs.Article {
 	var articles []root_structs.Article
-	links := Get_links(site_link, site_paths)
-	for _, link := range links {
+	var links []string
+
+	for {
+		if len(links) == 0 {
+			links = Get_links(site_link, site_paths)
+		} else {
+			break
+		}
+	}
+	wg.Add(len(links))
+	// channel := make(chan int, MAX)
+	for i, link := range links {
+		channel <- 1
 		go Get_article(link, site_paths)
+		// time.Sleep( * time.Second)
+		fmt.Println(i)
 	}
 	wg.Wait()
 	return articles
@@ -38,22 +69,39 @@ func Get_articles(site_link string, site_paths root_structs.Article_paths) []roo
 
 func Get_article(link string, site_paths root_structs.Article_paths) root_structs.Article {
 	defer wg.Done()
+	if !(strings.Contains(link, "https://")) {
+		link = add_domain_name(link[1:], site_paths)
+	}
+	// fmt.Println(link)
 	article_html, err := htmlquery.LoadURL(link)
 	if err != nil {
-		fmt.Println("An error occured while reading htmlfile")
+		fmt.Println("An error occured while reading htmlfile on " + link)
 	}
-	article := root_structs.Article{
+	for Get_element_by_xpath(article_html, "//div[@class='page_stat']", "text") != "" {
+		article_html, err = htmlquery.LoadURL(link)
+		if err != nil {
+			fmt.Println("An error occured while reading htmlfile on " + link)
+		}
+		time.Sleep(2 * time.Second)
+	}
+	// fmt.Println(htmlquery.OutputHTML(article_html, true))
+	fmt.Println(link, Get_element_by_xpath(article_html, "//div[@class='page_stat']", "text"))
+	var article = root_structs.Article{}
+	article = root_structs.Article{
 		Title:     Get_element_by_xpath(article_html, site_paths.Title_xpath, "title"),
 		Content:   Get_element_by_xpath(article_html, site_paths.Content_xpath, "content"),
 		Image_url: Get_element_by_xpath(article_html, site_paths.Image_url_xpath, "image"),
 		Pub_date:  Get_element_by_xpath(article_html, site_paths.Pub_date_xpath, "pub_date"),
 	}
-	fmt.Println(article)
+	fmt.Printf("%+v\n", article)
+	fmt.Println(len(article.Title))
+	<-channel
 	return article
 }
 
 func Get_element_by_xpath(page_html *html.Node, xpath string, elem_type string) string {
 	var elems []*html.Node
+	// elem_type := "text"
 	if elem_type == "image" || elem_type == "pub_date" {
 		found_elem := htmlquery.FindOne(page_html, xpath)
 		elems = append(elems, found_elem)
