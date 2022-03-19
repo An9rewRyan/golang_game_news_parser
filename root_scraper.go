@@ -16,7 +16,7 @@ func Get_links(site_link string, site_paths root_structs.Article_paths) []string
 	var links []string
 	page, err := htmlquery.LoadURL(site_link)
 	if err != nil {
-		panic(`not a valid XPath expression.`)
+		fmt.Println(`not a valid XPath expression.`)
 	}
 	links_hex := htmlquery.Find(page, site_paths.Links_xpath)
 	for _, link := range links_hex {
@@ -40,13 +40,12 @@ func Get_article(link string, site_paths root_structs.Article_paths) root_struct
 	defer wg.Done()
 	article_html, err := htmlquery.LoadURL(link)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("An error occured while reading htmlfile")
 	}
 	article := root_structs.Article{
 		Title:     Get_element_by_xpath(article_html, site_paths.Title_xpath, "title"),
 		Content:   Get_element_by_xpath(article_html, site_paths.Content_xpath, "content"),
 		Image_url: Get_element_by_xpath(article_html, site_paths.Image_url_xpath, "image"),
-		Author:    Get_element_by_xpath(article_html, site_paths.Author_xpath, "author"),
 		Pub_date:  Get_element_by_xpath(article_html, site_paths.Pub_date_xpath, "pub_date"),
 	}
 	fmt.Println(article)
@@ -55,14 +54,20 @@ func Get_article(link string, site_paths root_structs.Article_paths) root_struct
 
 func Get_element_by_xpath(page_html *html.Node, xpath string, elem_type string) string {
 	var elems []*html.Node
-	if elem_type == "image" || elem_type == "author" || elem_type == "pub_date" {
-		elems = append(elems, htmlquery.FindOne(page_html, xpath))
+	if elem_type == "image" || elem_type == "pub_date" {
+		found_elem := htmlquery.FindOne(page_html, xpath)
+		elems = append(elems, found_elem)
 	} else {
-		elems = htmlquery.Find(page_html, xpath)
+		found_elems := htmlquery.Find(page_html, xpath)
+		elems = found_elems
 	}
 	var elems_html []string
 	for _, elem := range elems {
-		elems_html = append(elems_html, htmlquery.OutputHTML(elem, true))
+		if elem == nil && (elem_type == "image" || elem_type == "pub_date") {
+			elems_html = append(elems_html, elem_type+" Not found")
+			break
+		}
+		elems_html = append(elems_html, htmlquery.InnerText(elem))
 	}
 	elem_html := strings.Join(elems_html, "")
 	return elem_html
