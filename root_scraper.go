@@ -12,15 +12,10 @@ import (
 	"golang.org/x/net/html"
 )
 
-// var wg sync.WaitGroup
-
 const MAX = 10
 
 var wg sync.WaitGroup
-
 var channel = make(chan int, MAX)
-
-// var article_channel = make(chan root_structs.Article)
 
 func add_domain_name(link string, site_paths root_structs.Article_paths) string {
 	re := regexp.MustCompile("//.*?/")
@@ -39,7 +34,6 @@ func Get_links(site_link string, site_paths root_structs.Article_paths) []string
 	for _, link := range links_hex {
 		links = append(links, htmlquery.SelectAttr(link, "href"))
 	}
-	// wg.Add(len(links))
 	fmt.Println("links!!", links, len(links))
 	return links
 }
@@ -56,11 +50,9 @@ func Get_articles(site_link string, site_paths root_structs.Article_paths) []roo
 		}
 	}
 	wg.Add(len(links))
-	// channel := make(chan int, MAX)
 	for i, link := range links {
 		channel <- 1
 		go Get_article(link, site_paths)
-		// time.Sleep( * time.Second)
 		fmt.Println(i)
 	}
 	wg.Wait()
@@ -72,20 +64,17 @@ func Get_article(link string, site_paths root_structs.Article_paths) root_struct
 	if !(strings.Contains(link, "https://")) {
 		link = add_domain_name(link[1:], site_paths)
 	}
-	// fmt.Println(link)
 	article_html, err := htmlquery.LoadURL(link)
 	if err != nil {
 		fmt.Println("An error occured while reading htmlfile on " + link)
 	}
-	for Get_element_by_xpath(article_html, "//div[@class='page_stat']", "text") != "" {
+	for Get_element_by_xpath(article_html, site_paths.Error_code_xpath, "text") != "" {
 		article_html, err = htmlquery.LoadURL(link)
 		if err != nil {
 			fmt.Println("An error occured while reading htmlfile on " + link)
 		}
 		time.Sleep(2 * time.Second)
 	}
-	// fmt.Println(htmlquery.OutputHTML(article_html, true))
-	fmt.Println(link, Get_element_by_xpath(article_html, "//div[@class='page_stat']", "text"))
 	var article = root_structs.Article{}
 	article = root_structs.Article{
 		Title:     Get_element_by_xpath(article_html, site_paths.Title_xpath, "title"),
@@ -101,7 +90,6 @@ func Get_article(link string, site_paths root_structs.Article_paths) root_struct
 
 func Get_element_by_xpath(page_html *html.Node, xpath string, elem_type string) string {
 	var elems []*html.Node
-	// elem_type := "text"
 	if elem_type == "image" || elem_type == "pub_date" {
 		found_elem := htmlquery.FindOne(page_html, xpath)
 		elems = append(elems, found_elem)

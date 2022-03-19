@@ -15,7 +15,8 @@ func Get_dtf_paths() root_structs.Article_paths {
 		// Author_xpath: "//a[@class='content-header-author content-header-author--user content-header__item']/div[@class='content-header-author__name']/text()",
 		// Author_xpath: "//a[@class='content-header-author content-header-author--user content-header__item']",
 		// Author_xpath: "//div[@class='l-hidden entry_data']/@data-article-info",
-		Site_link: "https://dtf.ru/gameindustry",
+		Site_link:        "https://dtf.ru/gameindustry",
+		Error_code_xpath: "//div[@class='error__code t-ff-1-700']/text()",
 	}
 	return DTF_paths
 }
