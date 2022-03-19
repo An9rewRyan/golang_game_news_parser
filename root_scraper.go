@@ -99,7 +99,7 @@ func Get_element_by_xpath(page_html *html.Node, xpath string, elem_type string) 
 	}
 	var elems_html []string
 	for _, elem := range elems {
-		if elem == nil && (elem_type == "image" || elem_type == "pub_date") {
+		if elem == nil && (elem_type == "image") {
 			elems_html = append(elems_html, elem_type+" Not found")
 			break
 		}
