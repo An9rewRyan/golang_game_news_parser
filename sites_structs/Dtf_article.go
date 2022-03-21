@@ -12,11 +12,10 @@ func Get_dtf_paths() root_structs.Article_paths {
 		Pub_date_xpath: "//time[@class='time']/@title",
 		Image_url_xpath: `//div[@class='content-image content-image--wide']/div[1]/@data-image-src|
 						 div[@class='content-image']/div[1]/@data-image-src`,
-		// Author_xpath: "//a[@class='content-header-author content-header-author--user content-header__item']/div[@class='content-header-author__name']/text()",
-		// Author_xpath: "//a[@class='content-header-author content-header-author--user content-header__item']",
-		// Author_xpath: "//div[@class='l-hidden entry_data']/@data-article-info",
-		Site_link:        "https://dtf.ru/gameindustry",
-		Error_code_xpath: "//div[@class='error__code t-ff-1-700']/text()",
+		Site_link:              "https://dtf.ru/gameindustry",
+		Error_code_xpath:       "//div[@class='error__code t-ff-1-700']/text()",
+		Error_message:          "Ошибка 404",
+		Use_js_generated_pages: false,
 	}
 	return DTF_paths
 }

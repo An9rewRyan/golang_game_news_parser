@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/antchfx/htmlquery"
+	"github.com/geziyor/geziyor"
+	"github.com/geziyor/geziyor/client"
 	"golang.org/x/net/html"
 )
 
@@ -16,6 +18,19 @@ const MAX = 10
 
 var wg sync.WaitGroup
 var channel = make(chan int, MAX)
+
+func get_js_genetated_page(link string) string {
+	var page_html string
+	geziyor.NewGeziyor(&geziyor.Options{
+		StartRequestsFunc: func(g *geziyor.Geziyor) {
+			g.GetRendered(link, g.Opt.ParseFunc)
+		},
+		ParseFunc: func(g *geziyor.Geziyor, r *client.Response) {
+			page_html = string(r.Body)
+		},
+	}).Start()
+	return page_html
+}
 
 func add_domain_name(link string, site_paths root_structs.Article_paths) string {
 	re := regexp.MustCompile("//.*?/")
@@ -26,15 +41,25 @@ func add_domain_name(link string, site_paths root_structs.Article_paths) string 
 
 func Get_links(site_link string, site_paths root_structs.Article_paths) []string {
 	var links []string
-	page, err := htmlquery.LoadURL(site_link)
-	if err != nil {
-		fmt.Println(`not a valid XPath expression.`)
+	var page *html.Node
+	var err error
+	if site_paths.Use_js_generated_pages {
+		page_html := get_js_genetated_page(site_link)
+		page, err = htmlquery.Parse(strings.NewReader(page_html))
+		if err != nil {
+			fmt.Println(err)
+		}
+	} else {
+		page, err = htmlquery.LoadURL(site_link)
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 	links_hex := htmlquery.Find(page, site_paths.Links_xpath)
 	for _, link := range links_hex {
 		links = append(links, htmlquery.SelectAttr(link, "href"))
 	}
-	fmt.Println("links!!", links, len(links))
+	fmt.Println(links)
 	return links
 }
 
@@ -44,16 +69,17 @@ func Get_articles(site_link string, site_paths root_structs.Article_paths) []roo
 
 	for {
 		if len(links) == 0 {
+			time.Sleep(2000 * time.Millisecond)
+			fmt.Println("retrying to get: " + site_link)
 			links = Get_links(site_link, site_paths)
 		} else {
 			break
 		}
 	}
 	wg.Add(len(links))
-	for i, link := range links {
+	for _, link := range links {
 		channel <- 1
 		go Get_article(link, site_paths)
-		fmt.Println(i)
 	}
 	wg.Wait()
 	return articles
@@ -61,30 +87,38 @@ func Get_articles(site_link string, site_paths root_structs.Article_paths) []roo
 
 func Get_article(link string, site_paths root_structs.Article_paths) root_structs.Article {
 	defer wg.Done()
+	var article_html *html.Node
+	var err error
 	if !(strings.Contains(link, "https://")) {
 		link = add_domain_name(link[1:], site_paths)
 	}
-	article_html, err := htmlquery.LoadURL(link)
-	if err != nil {
-		fmt.Println("An error occured while reading htmlfile on " + link)
+	if site_paths.Use_js_generated_pages {
+		article_plain := get_js_genetated_page(link)
+		article_html, err = htmlquery.Parse(strings.NewReader(article_plain))
+		if err != nil {
+			fmt.Println(err)
+		}
+	} else {
+		article_html, err = htmlquery.LoadURL(link)
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
-	for Get_element_by_xpath(article_html, site_paths.Error_code_xpath, "text") != "" {
+	for Get_element_by_xpath(article_html, site_paths.Error_code_xpath, "text") == site_paths.Error_message {
 		article_html, err = htmlquery.LoadURL(link)
 		if err != nil {
 			fmt.Println("An error occured while reading htmlfile on " + link)
 		}
-		fmt.Println(Get_element_by_xpath(article_html, site_paths.Error_code_xpath, "text"), "retrying to get"+link)
-		time.Sleep(2 * time.Second)
+		fmt.Println("retrying to get: " + link)
+		time.Sleep(1000 * time.Millisecond)
 	}
-	var article = root_structs.Article{}
-	article = root_structs.Article{
+	var article = root_structs.Article{
 		Title:     Get_element_by_xpath(article_html, site_paths.Title_xpath, "title"),
 		Content:   Get_element_by_xpath(article_html, site_paths.Content_xpath, "content"),
 		Image_url: Get_element_by_xpath(article_html, site_paths.Image_url_xpath, "image"),
 		Pub_date:  Get_element_by_xpath(article_html, site_paths.Pub_date_xpath, "pub_date"),
 	}
 	fmt.Printf("%+v\n", article)
-	fmt.Println(len(article.Title))
 	<-channel
 	return article
 }
