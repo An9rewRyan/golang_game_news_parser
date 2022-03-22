@@ -89,6 +89,7 @@ func Get_articles(site_link string, site_paths root_structs.Article_paths) []roo
 		go Get_article(link, site_paths)
 	}
 	Wg.Wait()
+	Wg_global.Done()
 	return articles
 }
 
