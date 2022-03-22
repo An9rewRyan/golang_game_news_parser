@@ -6,7 +6,9 @@ import (
 )
 
 func main() {
-	site_paths := sites_structs.Get_dtf_paths()
+	site_paths := sites_structs.Get_igrm_paths()
 	articles := Get_articles(site_paths.Site_link, site_paths)
+	site_paths = sites_structs.Get_dtf_paths()
+	articles = Get_articles(site_paths.Site_link, site_paths)
 	fmt.Println(articles)
 }

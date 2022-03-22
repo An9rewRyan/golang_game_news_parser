@@ -6,7 +6,8 @@ import (
 
 func Get_igrm_paths() root_structs.Article_paths {
 	IGRM_paths := root_structs.Article_paths{
-		Links_xpath:            "//a[@class='aubli_img']/@href",
+		// Links_xpath:            "//a[@class='aubli_img']/@href",
+		Links_xpath:            "//a[@class='aubli_ismg']/@href",
 		Title_xpath:            "//h1[@class ='page_news_ttl haveselect']/text()",
 		Content_xpath:          "//text()[ancestor::div/@class='universal_content clearfix' and not(ancestor::div[@class='uninote console'])]",
 		Pub_date_xpath:         "//div[@class='page_news noselect']/meta[@itemprop = 'datePublished']/@content",

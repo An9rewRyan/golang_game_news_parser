@@ -14,8 +14,8 @@ import (
 	"golang.org/x/net/html"
 )
 
-var wg sync.WaitGroup
-var channel = make(chan int, MAX_amount_of_goroutines)
+var Wg sync.WaitGroup
+var Channel = make(chan int, MAX_amount_of_goroutines)
 
 func get_js_genetated_page(link string) string {
 	var page_html string
@@ -64,29 +64,45 @@ func Get_links(site_link string, site_paths root_structs.Article_paths) []string
 func Get_articles(site_link string, site_paths root_structs.Article_paths) []root_structs.Article {
 	var articles []root_structs.Article
 	var links []string
-
+	amount_of_retries := 0
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Printf("Failed to load links for %s, tried for %d times. The link xpath is probably wrong.\n", site_link, MAX_amount_of_loading_retries)
+		}
+	}()
 	for {
+		if amount_of_retries == MAX_amount_of_loading_retries {
+			panic("1000") //status code for max retries while loading links
+		}
 		if len(links) == 0 {
+			amount_of_retries++
 			time.Sleep(Links_loading_retry_time * time.Millisecond)
-			fmt.Println("retrying to get: " + site_link)
+			fmt.Printf("tryed to load %s for %d amount of times, retrying...\n", site_link, amount_of_retries)
 			links = Get_links(site_link, site_paths)
 		} else {
 			break
 		}
 	}
-	wg.Add(len(links))
+	Wg.Add(len(links))
 	for _, link := range links {
-		channel <- 1
+		Channel <- 1
 		go Get_article(link, site_paths)
 	}
-	wg.Wait()
+	Wg.Wait()
 	return articles
 }
 
 func Get_article(link string, site_paths root_structs.Article_paths) root_structs.Article {
-	defer wg.Done()
+	amount_of_retries := 0
 	var article_html *html.Node
 	var err error
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Printf("Failed to load source for %s, tried for %d times. The link xpath is probably wrong.\n", link, MAX_amount_of_loading_retries)
+			<-Channel
+			Wg.Done()
+		}
+	}()
 	if !(strings.Contains(link, "https://")) {
 		link = add_domain_name(link[1:], site_paths)
 	}
@@ -103,9 +119,14 @@ func Get_article(link string, site_paths root_structs.Article_paths) root_struct
 		}
 	}
 	for Get_element_by_xpath(article_html, site_paths.Error_code_xpath, "text") == site_paths.Error_message {
+		if amount_of_retries == MAX_amount_of_loading_retries {
+			error_data := "1001"
+			panic(error_data) //status code for max retries while loading article
+		}
 		article_html, err = htmlquery.LoadURL(link)
+		amount_of_retries++
 		if err != nil {
-			fmt.Println("An error occured while reading htmlfile on " + link)
+			fmt.Printf("An error occured while reading htmlfile on %s \n", link)
 		}
 		fmt.Println("retrying to get: " + link)
 		time.Sleep(Article_loading_retry_time * time.Millisecond)
@@ -117,7 +138,8 @@ func Get_article(link string, site_paths root_structs.Article_paths) root_struct
 		Pub_date:  Get_element_by_xpath(article_html, site_paths.Pub_date_xpath, "pub_date"),
 	}
 	fmt.Printf("%+v\n", article)
-	<-channel
+	<-Channel
+	Wg.Done()
 	return article
 }
 
