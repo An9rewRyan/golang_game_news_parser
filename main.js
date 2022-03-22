@@ -13,16 +13,16 @@ async function get_js_rendered_page (link) {
     let bodyHTML = await page.evaluate(() => document.documentElement.outerHTML);
     await page.screenshot({ path: 'example.png' });
     console.log(bodyHTML);
-    await fs.truncate('/mnt/d/go/parser/golang_game_news_parser/loaded.html', 0, function(){console.log('done')});
-    await fs.writeFile('/mnt/d/go/parser/golang_game_news_parser/loaded.html', bodyHTML, err => {
-        if (err) {
-          console.error(err);
-          return 'Failed!';
-        }
-    })
-    console.log("Cool!")
+    // await fs.truncate('/mnt/d/go/parser/golang_game_news_parser/loaded.html', 0, function(){console.log('done')});
+    // let written = await fs.writeFile('/mnt/d/go/parser/golang_game_news_parser/loaded.html', bodyHTML, err => {
+    //     if (err) {
+    //       console.error(err);
+    //       return 'Failed!';
+    //     }
+    // })
+    console.log(bodyHTML)
     await browser.close();
-    return 'Processed!';
+    return bodyHTML;
 }
 
 
@@ -34,15 +34,7 @@ app.use(
 app.use(express.json())
 app.post('/', (req, res) => {
   console.log(req.body)
+  let data = get_js_rendered_page(req.body.link)
+  data.then(res.send.bind(res)).catch(error => {console.log(error+"promise rejected!")})
 })
 app.listen(8000);
-// const http = require('http');
-// const requestListener = function (req, res) {
-//   console.log(req.body)
-//   console.log.apply(req.)
-//   res.writeHead(200);
-//   // res.end(get_js_rendered_page(req.body));
-// }
-// const server = http.createServer(requestListener);
-// server.listen(8080);
-// // get_js_rendered_page("https://kanobu.ru/videogames//")

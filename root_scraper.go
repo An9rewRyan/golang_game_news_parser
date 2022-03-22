@@ -13,7 +13,6 @@ import (
 	"github.com/geziyor/geziyor/client"
 	"golang.org/x/net/html"
 )
-
 var Wg sync.WaitGroup
 var Channel = make(chan int, MAX_amount_of_goroutines)
 
