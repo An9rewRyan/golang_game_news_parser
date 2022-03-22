@@ -14,10 +14,8 @@ import (
 	"golang.org/x/net/html"
 )
 
-const MAX = 10
-
 var wg sync.WaitGroup
-var channel = make(chan int, MAX)
+var channel = make(chan int, MAX_amount_of_goroutines)
 
 func get_js_genetated_page(link string) string {
 	var page_html string
@@ -69,7 +67,7 @@ func Get_articles(site_link string, site_paths root_structs.Article_paths) []roo
 
 	for {
 		if len(links) == 0 {
-			time.Sleep(2000 * time.Millisecond)
+			time.Sleep(Links_loading_retry_time * time.Millisecond)
 			fmt.Println("retrying to get: " + site_link)
 			links = Get_links(site_link, site_paths)
 		} else {
@@ -110,7 +108,7 @@ func Get_article(link string, site_paths root_structs.Article_paths) root_struct
 			fmt.Println("An error occured while reading htmlfile on " + link)
 		}
 		fmt.Println("retrying to get: " + link)
-		time.Sleep(1000 * time.Millisecond)
+		time.Sleep(Article_loading_retry_time * time.Millisecond)
 	}
 	var article = root_structs.Article{
 		Title:     Get_element_by_xpath(article_html, site_paths.Title_xpath, "title"),
