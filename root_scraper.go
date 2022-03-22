@@ -1,7 +1,11 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"parser/root_structs"
 	"regexp"
 	"strings"
@@ -13,10 +17,11 @@ import (
 	"github.com/geziyor/geziyor/client"
 	"golang.org/x/net/html"
 )
+
 var Wg sync.WaitGroup
 var Channel = make(chan int, MAX_amount_of_goroutines)
 
-func get_js_genetated_page(link string) string {
+func get_js_genetated_page_geziyor(link string) string {
 	var page_html string
 	geziyor.NewGeziyor(&geziyor.Options{
 		StartRequestsFunc: func(g *geziyor.Geziyor) {
@@ -27,6 +32,20 @@ func get_js_genetated_page(link string) string {
 		},
 	}).Start()
 	return page_html
+}
+
+func get_js_genetated_page(link string) string {
+	values := map[string]string{"link": link}
+	jsonValue, _ := json.Marshal(values)
+	resp, err := http.Post("http://localhost:8000", "application/json", bytes.NewBuffer(jsonValue))
+	if err != nil {
+		fmt.Println(err)
+	}
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return string(bodyBytes)
 }
 
 func add_domain_name(link string, site_paths root_structs.Article_paths) string {
@@ -56,8 +75,10 @@ func Get_links(site_link string, site_paths root_structs.Article_paths) []string
 	for _, link := range links_hex {
 		links = append(links, htmlquery.SelectAttr(link, "href"))
 	}
-	fmt.Println(links)
-	return links
+	links_no_duplicates := removeDuplicateStr(links)
+	links_no_duplicates = links_no_duplicates[0:5]
+	fmt.Println(links_no_duplicates)
+	return links_no_duplicates
 }
 
 func Get_articles(site_link string, site_paths root_structs.Article_paths) []root_structs.Article {
@@ -69,6 +90,9 @@ func Get_articles(site_link string, site_paths root_structs.Article_paths) []roo
 			fmt.Printf("Failed to load links for %s, tried for %d times. The link xpath is probably wrong.\n", site_link, MAX_amount_of_loading_retries)
 		}
 	}()
+	if site_paths.Use_js_generated_pages {
+		Channel = make(chan int, 1)
+	}
 	for {
 		if amount_of_retries == MAX_amount_of_loading_retries {
 			panic("1000") //status code for max retries while loading links

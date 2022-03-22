@@ -1,4 +1,4 @@
-package mains
+package main
 
 import (
 	"fmt"
@@ -11,11 +11,11 @@ var Wg_global sync.WaitGroup
 
 func main() {
 	site_paths := []root_structs.Article_paths{
-		sites_structs.Get_igrm_paths(),
-		sites_structs.Get_dtf_paths(),
-		sites_structs.Get_sg_paths(),
+		// sites_structs.Get_igrm_paths(),
+		// sites_structs.Get_dtf_paths(),
+		// sites_structs.Get_sg_paths(),
 		sites_structs.Get_pgd_paths(),
-		sites_structs.Get_vg_paths(),
+		// sites_structs.Get_vg_paths(),
 	}
 	Wg_global.Add(len(site_paths))
 	for _, site_path := range site_paths {
