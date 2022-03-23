@@ -53,13 +53,19 @@ async function get_js_rendered_page (link) {
       args: minimal_args
     });
     page = await browser.newPage();
-
+    await page.setDefaultNavigationTimeout(0); 
     await page.goto(link, {
       waitUntil: 'load',
     });
 
     let bodyHTML = await page.evaluate(() => document.documentElement.outerHTML);
-
+    // await fs.truncate('/mnt/d/go/parser/golang_game_news_parser/loaded.html', 0, function(){console.log('done')});
+    // await fs.writeFile('/mnt/d/go/parser/golang_game_news_parser/loaded.html', bodyHTML, err => {
+    //     if (err) {
+    //       console.error(err);
+    //       return 'Failed!';
+    //     }
+    // })
     await browser.close();
     return bodyHTML;
 }

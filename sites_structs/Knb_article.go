@@ -11,7 +11,7 @@ func Get_knb_paths() root_structs.Article_paths {
 									 @class='style_body__H1Cks' or
 									 @class='SmallTextCard_body__f7Khf']`,
 		Title_xpath:            "//h1/text()",
-		Content_xpath:          "//text()[ancestor::div[starts-with(@class, 'material-content']]",
+		Content_xpath:          "//text()[ancestor::div[starts-with(@class, 'material-content')]]",
 		Pub_date_xpath:         "//script[@type='application/ld+json']/text()",
 		Image_url_xpath:        "//link[@rel='preload'][@as='image']/@href",
 		Site_link:              "https://kanobu.ru/videogames/",

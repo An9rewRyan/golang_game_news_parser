@@ -45,6 +45,8 @@ func get_js_genetated_page(link string) string {
 	if err != nil {
 		fmt.Println(err)
 	}
+	// fmt.Println(string(bodyBytes))
+	// panic("OmG!")
 	return string(bodyBytes)
 }
 
@@ -76,7 +78,9 @@ func Get_links(site_link string, site_paths root_structs.Article_paths) []string
 		links = append(links, htmlquery.SelectAttr(link, "href"))
 	}
 	links_no_duplicates := removeDuplicateStr(links)
-	links_no_duplicates = links_no_duplicates[0:5]
+	if len(links_no_duplicates) != 0 {
+		links_no_duplicates = links_no_duplicates[0:5]
+	}
 	fmt.Println(links_no_duplicates)
 	return links_no_duplicates
 }
@@ -87,7 +91,8 @@ func Get_articles(site_link string, site_paths root_structs.Article_paths) []roo
 	amount_of_retries := 0
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Printf("Failed to load links for %s, tried for %d times. The link xpath is probably wrong.\n", site_link, MAX_amount_of_loading_retries)
+			fmt.Printf("Failed to load links for %s, tried for %d times. The link xpath is probably wrong.\n", site_link, amount_of_retries)
+			fmt.Println(err)
 		}
 	}()
 	if site_paths.Use_js_generated_pages {
@@ -122,7 +127,8 @@ func Get_article(link string, site_paths root_structs.Article_paths) root_struct
 	var err error
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Printf("Failed to load source for %s, tried for %d times. The link xpath is probably wrong.\n", link, MAX_amount_of_loading_retries)
+			fmt.Printf("Failed to load source for %s, tried for %d times. The link xpath is probably wrong.\n", link, amount_of_retries)
+			fmt.Println(err)
 			<-Channel
 			Wg.Done()
 		}
