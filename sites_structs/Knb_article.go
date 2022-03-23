@@ -18,6 +18,7 @@ func Get_knb_paths() root_structs.Article_paths {
 		Error_code_xpath:       "//div[@class='knb-404_title']/text()",
 		Error_message:          "Страница не найдена!",
 		Use_js_generated_pages: true,
+		Site_alias:             "knb",
 	}
 	return KNB_paths
 }

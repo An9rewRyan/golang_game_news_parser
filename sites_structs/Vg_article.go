@@ -15,6 +15,7 @@ func Get_vg_paths() root_structs.Article_paths {
 		Error_code_xpath:       "//div[@class='radius']/div[@class='cup ln']/text()",
 		Error_message:          "Внимание, обнаружена ошибка",
 		Use_js_generated_pages: false,
+		Site_alias:             "vg",
 	}
 	return VG_paths
 }

@@ -15,6 +15,7 @@ func Get_pgd_paths() root_structs.Article_paths {
 		Error_code_xpath:       "//div[@class='module-title']/text()",
 		Error_message:          "Страница не найдена",
 		Use_js_generated_pages: true,
+		Site_alias:             "pgd",
 	}
 	return PGD_paths
 }

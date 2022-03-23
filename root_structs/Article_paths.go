@@ -10,4 +10,5 @@ type Article_paths struct {
 	Error_code_xpath       string `json:"error_code_xpath"`
 	Error_message          string `json:"error_message"`
 	Use_js_generated_pages bool   `json:"use_js_generated_pages"`
+	Site_alias             string `json:"site_alias"`
 }

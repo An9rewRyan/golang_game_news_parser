@@ -16,6 +16,7 @@ func Get_dtf_paths() root_structs.Article_paths {
 		Error_code_xpath:       "//div[@class='error__code t-ff-1-700']/text()",
 		Error_message:          "Ошибка 404",
 		Use_js_generated_pages: false,
+		Site_alias:             "dtf",
 	}
 	return DTF_paths
 }

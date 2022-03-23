@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"parser/formatters"
 	"parser/root_structs"
 	"regexp"
 	"strings"
@@ -79,7 +80,7 @@ func Get_links(site_link string, site_paths root_structs.Article_paths) []string
 	}
 	links_no_duplicates := removeDuplicateStr(links)
 	if len(links_no_duplicates) != 0 {
-		links_no_duplicates = links_no_duplicates[0:5]
+		links_no_duplicates = links_no_duplicates[0:2]
 	}
 	fmt.Println(links_no_duplicates)
 	return links_no_duplicates
@@ -117,7 +118,7 @@ func Get_articles(site_link string, site_paths root_structs.Article_paths) []roo
 		go Get_article(link, site_paths)
 	}
 	Wg.Wait()
-	Wg_global.Done()
+	// Wg_global.Done()
 	return articles
 }
 
@@ -167,9 +168,10 @@ func Get_article(link string, site_paths root_structs.Article_paths) root_struct
 		Image_url: Get_element_by_xpath(article_html, site_paths.Image_url_xpath, "image"),
 		Pub_date:  Get_element_by_xpath(article_html, site_paths.Pub_date_xpath, "pub_date"),
 	}
-	fmt.Printf("%+v\n", article)
+	fmt.Printf("%+v\n", formatters.Format_article(article, site_paths))
 	<-Channel
 	Wg.Done()
+
 	return article
 }
 

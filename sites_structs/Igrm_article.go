@@ -15,6 +15,7 @@ func Get_igrm_paths() root_structs.Article_paths {
 		Error_code_xpath:       "//div[@class='page_stat']/text()",
 		Error_message:          "Страница не найдена",
 		Use_js_generated_pages: false,
+		Site_alias:             "igrm",
 	}
 	return IGRM_paths
 }
