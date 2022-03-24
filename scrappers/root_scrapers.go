@@ -22,7 +22,7 @@ func Get_links(site_link string, site_paths root_structs.Article_paths) []string
 	var page *html.Node
 	var err error
 	if site_paths.Use_js_generated_pages {
-		page_html := Get_js_genetated_page(site_link)
+		page_html := utils.Get_js_genetated_page(site_link)
 		page, err = htmlquery.Parse(strings.NewReader(page_html))
 		if err != nil {
 			fmt.Println(err)
@@ -41,7 +41,6 @@ func Get_links(site_link string, site_paths root_structs.Article_paths) []string
 	if len(links_no_duplicates) != 0 {
 		links_no_duplicates = links_no_duplicates[0:2]
 	}
-	// fmt.Println(links_no_duplicates)
 	return links_no_duplicates
 }
 
@@ -77,7 +76,6 @@ func Get_articles(site_link string, site_paths root_structs.Article_paths) []roo
 		go Get_article(link, site_paths)
 	}
 	Wg.Wait()
-	// Wg_global.Done()
 	return articles
 }
 
@@ -94,10 +92,10 @@ func Get_article(link string, site_paths root_structs.Article_paths) root_struct
 		}
 	}()
 	if !(strings.Contains(link, "https://")) {
-		link = Add_domain_name(link[1:], site_paths)
+		link = utils.Add_domain_name(link[1:], site_paths)
 	}
 	if site_paths.Use_js_generated_pages {
-		article_plain := Get_js_genetated_page(link)
+		article_plain := utils.Get_js_genetated_page(link)
 		article_html, err = htmlquery.Parse(strings.NewReader(article_plain))
 		if err != nil {
 			fmt.Println(err)
@@ -108,7 +106,7 @@ func Get_article(link string, site_paths root_structs.Article_paths) root_struct
 			fmt.Println(err)
 		}
 	}
-	for Get_element_by_xpath(article_html, site_paths.Error_code_xpath, "text") == site_paths.Error_message {
+	for utils.Get_element_by_xpath(article_html, site_paths.Error_code_xpath, "text") == site_paths.Error_message {
 		if amount_of_retries == config.MAX_amount_of_loading_retries {
 			error_data := "1001"
 			panic(error_data) //status code for max retries while loading article
@@ -122,13 +120,12 @@ func Get_article(link string, site_paths root_structs.Article_paths) root_struct
 		time.Sleep(config.Article_loading_retry_time * time.Millisecond)
 	}
 	var article = root_structs.Article{
-		Title:     Get_element_by_xpath(article_html, site_paths.Title_xpath, "title"),
-		Content:   Get_element_by_xpath(article_html, site_paths.Content_xpath, "content"),
-		Image_url: Get_element_by_xpath(article_html, site_paths.Image_url_xpath, "image"),
-		Pub_date:  Get_element_by_xpath(article_html, site_paths.Pub_date_xpath, "pub_date"),
+		Title:     utils.Get_element_by_xpath(article_html, site_paths.Title_xpath, "title"),
+		Content:   utils.Get_element_by_xpath(article_html, site_paths.Content_xpath, "content"),
+		Image_url: utils.Get_element_by_xpath(article_html, site_paths.Image_url_xpath, "image"),
+		Pub_date:  utils.Get_element_by_xpath(article_html, site_paths.Pub_date_xpath, "pub_date"),
 	}
 	article = formatters.Format_article(article, site_paths)
-	// fmt.Printf("%+v\n", article)
 	utils.Write_article_to_db(article)
 
 	<-Channel
