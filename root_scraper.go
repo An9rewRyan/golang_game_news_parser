@@ -82,7 +82,7 @@ func Get_links(site_link string, site_paths root_structs.Article_paths) []string
 	if len(links_no_duplicates) != 0 {
 		links_no_duplicates = links_no_duplicates[0:2]
 	}
-	fmt.Println(links_no_duplicates)
+	// fmt.Println(links_no_duplicates)
 	return links_no_duplicates
 }
 
@@ -168,8 +168,10 @@ func Get_article(link string, site_paths root_structs.Article_paths) root_struct
 		Image_url: Get_element_by_xpath(article_html, site_paths.Image_url_xpath, "image"),
 		Pub_date:  Get_element_by_xpath(article_html, site_paths.Pub_date_xpath, "pub_date"),
 	}
-	fmt.Printf("%+v\n", formatters.Format_article(article, site_paths))
+	article = formatters.Format_article(article, site_paths)
 	// fmt.Printf("%+v\n", article)
+	Write_article_to_db(article)
+
 	<-Channel
 	Wg.Done()
 

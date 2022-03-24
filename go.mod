@@ -9,6 +9,7 @@ require (
 	github.com/geziyor/geziyor v0.0.0-20211211110410-34d17a2d3d5a
 	github.com/go-kit/kit v0.12.0 // indirect
 	github.com/gotk3/gotk3 v0.6.1 // indirect
+	github.com/lib/pq v1.10.4
 	github.com/prometheus/client_golang v1.12.1 // indirect
 	github.com/sourcegraph/go-webkit2 v0.0.0-20170811231113-ade305cf91f4 // indirect
 	github.com/sourcegraph/webloop v0.0.0-20210830205015-abd9d7573123 // indirect
