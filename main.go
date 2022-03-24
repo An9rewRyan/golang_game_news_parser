@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"parser/root_structs"
+	"parser/scrappers"
 	"parser/sites_structs"
 )
 
@@ -19,7 +20,7 @@ func main() {
 	}
 	// Wg_global.Add(len(site_paths))
 	for _, site_path := range site_paths {
-		Get_articles(site_path.Site_link, site_path)
+		scrappers.Get_articles(site_path.Site_link, site_path)
 	}
 	// Wg_global.Wait()
 	fmt.Println("Done!")
