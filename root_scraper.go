@@ -169,6 +169,7 @@ func Get_article(link string, site_paths root_structs.Article_paths) root_struct
 		Pub_date:  Get_element_by_xpath(article_html, site_paths.Pub_date_xpath, "pub_date"),
 	}
 	fmt.Printf("%+v\n", formatters.Format_article(article, site_paths))
+	// fmt.Printf("%+v\n", article)
 	<-Channel
 	Wg.Done()
 
