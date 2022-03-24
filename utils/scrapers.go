@@ -42,10 +42,13 @@ func Get_js_genetated_page(link string) string {
 }
 
 func Add_domain_name(link string, site_paths root_structs.Article_paths) string {
-	re := regexp.MustCompile("//.*?/")
-	match := re.FindStringSubmatch(site_paths.Site_link)
-	domain_name := match[0]
-	return "https:" + domain_name + link
+	if !(strings.Contains(link, "https://")) {
+		re := regexp.MustCompile("//.*?/")
+		match := re.FindStringSubmatch(site_paths.Site_link)
+		domain_name := match[0]
+		return "https:" + domain_name + link[1:]
+	}
+	return link
 }
 
 func Get_element_by_xpath(page_html *html.Node, xpath string, elem_type string) string {
