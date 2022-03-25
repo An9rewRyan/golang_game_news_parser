@@ -1,0 +1,31 @@
+version: "0.0.1"
+services:
+
+  go_parser:
+    build: ./main_parser
+    command:  /bin/sh -c "ls && cd main_parser && rm -r -f parser && go build . && ./parser"
+    volumes: 
+      - .:/go_parser
+    depends_on:
+      - js_parser
+      - db
+
+  js_parser:
+    build: ./js_rendering
+    command: bash -c "ls && cd js_rendering && node main.js"
+    ports:
+      - 8000:8000
+    volumes: 
+      - .:/js_parser
+
+  db:
+    image: 'postgres:13.0-alpine'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: 1234
+        POSTGRES_DB: gg
+
+volumes:
+  postgres_data:

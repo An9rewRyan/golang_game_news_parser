@@ -1,0 +1,28 @@
+{
+  "name": "js_rendering",
+  "version": "1.0.0",
+  "description": "use for render js generated pages",
+  "main": "main.js",
+  "dependencies": {
+    "express": "^4.17.3",
+    "puppeteer": "^13.5.1",
+    "puppeteer-cluster": "^0.23.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "node main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MichaelJGoldberg/golang_game_news_parser.git"
+  },
+  "keywords": [
+    "cool"
+  ],
+  "author": "albertwesker",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MichaelJGoldberg/golang_game_news_parser/issues"
+  },
+  "homepage": "https://github.com/MichaelJGoldberg/golang_game_news_parser#readme"
+}
