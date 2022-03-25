@@ -12,7 +12,6 @@ import (
 func Write_article_to_db(article root_structs.Article) string {
 	Db := Connect_database()
 	defer Db.Close()
-	// insert_string_to_artcls := `Select src_link from articles where  src_link = "asdadadad";`
 	insert_string_to_artcls := `insert into articles(title, content, pub_date, image_url, src_link, site_name)
 					  			values(` + `'` + article.Title + `','` + article.Content + `','` + article.Pub_date + `','` + article.Image_url + `','` + article.Source_link + `','` + article.Site_alias + `')`
 	insert_string_to_recent := `insert into recently_loaded_articles(pub_date, src_link, site_name)
@@ -39,13 +38,10 @@ func Check_if_article_in_db(link string) bool {
 	Db := Connect_database()
 	var found string
 	defer Db.Close()
-	// fmt.Println("Вызывается фугкция!!!")
 	check_string := `select src_link from recently_loaded_articles where src_link = '` + link + `'`
 	if err := Db.QueryRow(check_string).Scan(&found); err != nil {
-		fmt.Println(err, "Тут")
 		return false
 	}
-	fmt.Println("Там")
 	return true
 }
 
@@ -54,8 +50,7 @@ func Connect_database() *sql.DB {
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		// fmt.Println("Подключение к базе данных было успешно")
+		fmt.Println("Database connected succefully")
 	}
-	// defer db.Close()
 	return db
 }

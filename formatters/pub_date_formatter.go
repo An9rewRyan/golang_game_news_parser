@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+//there is 2 most popular pub_date types on web sites i parse, so i use 2 split funcs
 func Format_pub_date(pub_date string) string {
 	if strings.Contains(pub_date, "{") {
 		var result map[string]string

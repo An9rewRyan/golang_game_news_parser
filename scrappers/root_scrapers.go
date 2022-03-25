@@ -62,8 +62,8 @@ func Get_articles(site_link string, site_paths root_structs.Article_paths) []roo
 	var articles []root_structs.Article
 	amount_of_retries := 0
 	links := Get_links(site_link, site_paths)
+	//it means that there are no new articles
 	if links[0] == "no new links" {
-		fmt.Println("Here!")
 		return articles
 	}
 	defer func() {
@@ -72,6 +72,7 @@ func Get_articles(site_link string, site_paths root_structs.Article_paths) []roo
 			fmt.Println(err)
 		}
 	}()
+	//reducing channel capacity, because js rendering server has troubles with concurrency (yet)
 	if site_paths.Use_js_generated_pages {
 		Channel = make(chan int, 1)
 	}
@@ -122,16 +123,25 @@ func Get_article(link string, site_paths root_structs.Article_paths) root_struct
 			fmt.Println(err)
 		}
 	}
+	//checking if parser got proper response (not 404 page)
 	for utils.Get_element_by_xpath(article_html, site_paths.Error_code_xpath, "text") == site_paths.Error_message {
 		if amount_of_retries == config.MAX_amount_of_loading_retries {
 			error_data := "1001"
 			panic(error_data) //status code for max retries while loading article
 		}
-		article_html, err = htmlquery.LoadURL(link)
-		amount_of_retries++
-		if err != nil {
-			fmt.Printf("An error occured while reading htmlfile on %s \n", link)
+		if site_paths.Use_js_generated_pages {
+			article_plain := utils.Get_js_genetated_page(link)
+			article_html, err = htmlquery.Parse(strings.NewReader(article_plain))
+			if err != nil {
+				fmt.Println(err)
+			}
+		} else {
+			article_html, err = htmlquery.LoadURL(link)
+			if err != nil {
+				fmt.Printf("An error occured while reading htmlfile on %s \n", link)
+			}
 		}
+		amount_of_retries++
 		fmt.Println("retrying to get: " + link)
 		time.Sleep(config.Article_loading_retry_time * time.Millisecond)
 	}
@@ -144,7 +154,6 @@ func Get_article(link string, site_paths root_structs.Article_paths) root_struct
 		Site_alias:  site_paths.Site_alias,
 	}
 	article = formatters.Format_article(article, site_paths)
-	// fmt.Println(article)
 	utils.Write_article_to_db(article)
 
 	<-Channel

@@ -17,16 +17,17 @@ func Format_single_commas(text string) string {
 	return strings.Replace(text, "'", "''", -1)
 }
 
+func Basic_text_formatting(text string) string {
+	text_formatted := Delete_whitespaces(text)
+	text_formatted = Format_single_commas(text_formatted)
+	text_formatted = strings.Replace(text_formatted, "\u00a0", " ", -1) //for deleting unbrakable space
+	return text_formatted
+}
+
 func Format_title(title string) string {
-	title_formatted := Delete_whitespaces(title)
-	title_formatted = Format_single_commas(title_formatted)
-	title_formatted = strings.Replace(title_formatted, "\u00a0", " ", -1)
-	return title_formatted
+	return Basic_text_formatting(title)
 }
 
 func Format_content(content string) string {
-	content_formatted := Delete_whitespaces(content)
-	content_formatted = Format_single_commas(content_formatted)
-	content_formatted = strings.Replace(content_formatted, "\u00a0", " ", -1)
-	return content_formatted
+	return Basic_text_formatting(content)
 }

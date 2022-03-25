@@ -14,19 +14,6 @@ import (
 	"golang.org/x/net/html"
 )
 
-// func get_js_genetated_page_geziyor(link string) string {
-// 	var page_html string
-// 	geziyor.NewGeziyor(&geziyor.Options{
-// 		StartRequestsFunc: func(g *geziyor.Geziyor) {
-// 			g.GetRendered(link, g.Opt.ParseFunc)
-// 		},
-// 		ParseFunc: func(g *geziyor.Geziyor, r *client.Response) {
-// 			page_html = string(r.Body)
-// 		},
-// 	}).Start()
-// 	return page_html
-// }
-
 func Get_js_genetated_page(link string) string {
 	values := map[string]string{"link": link}
 	jsonValue, _ := json.Marshal(values)

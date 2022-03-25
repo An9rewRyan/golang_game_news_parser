@@ -3,6 +3,7 @@ const fs = require("fs");
 const express = require('express')
 const app = express()
 
+//this huge thing has necessary args for increasing performance 
 const minimal_args = [
   '--autoplay-policy=user-gesture-required',
   '--disable-background-networking',
@@ -59,13 +60,7 @@ async function get_js_rendered_page (link) {
     });
 
     let bodyHTML = await page.evaluate(() => document.documentElement.outerHTML);
-    // await fs.truncate('/mnt/d/go/parser/golang_game_news_parser/loaded.html', 0, function(){console.log('done')});
-    // await fs.writeFile('/mnt/d/go/parser/golang_game_news_parser/loaded.html', bodyHTML, err => {
-    //     if (err) {
-    //       console.error(err);
-    //       return 'Failed!';
-    //     }
-    // })
+    
     await browser.close();
     return bodyHTML;
 }
