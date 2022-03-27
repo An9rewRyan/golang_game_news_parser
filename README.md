@@ -11,8 +11,8 @@
  1. Download docker compose on your machine
  2. Uncomment marked string in main.go file, for creating tables (comment it after first sucessfull launch)
  3. Download this repo
- 4. Run (from the root directory): *docker compose build 
- 5. Run: *docker compose up
+ 4. Run (from the root directory): docker compose build 
+ 5. Run: docker compose up
  6. Enjoy! ;p
 
 ***
