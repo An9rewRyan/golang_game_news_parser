@@ -24,7 +24,7 @@
 
 **Other projects using this parser:**
  - **[Gamers Gazette](https://github.com/authoraytee/gamers_gazette)** - web platform based on this parser
- - Maybe else (...)
+ - **[Golang game prices_parser](https://github.com/An9rewRyan/golang_games_prices_parser)** - game parser which uses pattern from this one (also part of GG)
 
 ---
 
