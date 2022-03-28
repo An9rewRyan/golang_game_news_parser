@@ -8,9 +8,12 @@
 ---
 
 ### How to launch: 
- 1. Start node server and installing puppeteer
- 2. Launch local psql server and changing dbConnStr in config.go by your setting, create article table by article struct
- 3. Launch parser.exe
+ 1. Download docker compose on your machine
+ 2. Uncomment marked string in main.go file, for creating tables (comment it after first sucessfull launch)
+ 3. Download this repo
+ 4. Run (from the root directory): docker compose build 
+ 5. Run: docker compose up
+ 6. Enjoy! ;p
 
 ***
 **What is used for what:**
@@ -21,7 +24,7 @@
 
 **Other projects using this parser:**
  - **[Gamers Gazette](https://github.com/authoraytee/gamers_gazette)** - web platform based on this parser
- - Maybe else (...)
+ - **[Golang game prices_parser](https://github.com/An9rewRyan/golang_games_prices_parser)** - game parser which uses pattern from this one (also part of GG)
 
 ---
 
