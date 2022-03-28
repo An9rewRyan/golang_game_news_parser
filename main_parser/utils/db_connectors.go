@@ -54,3 +54,33 @@ func Connect_database() *sql.DB {
 	}
 	return db
 }
+
+func create_articles_table() {
+	Db := Connect_database()
+	defer Db.Close()
+	_, err := Db.Exec(`create table articles (
+		article_id serial primary key,
+		title varchar(300) not null,
+		content text not null, 
+		pub_date timestamp not null,
+		image_url varchar(300) not null,
+		src_link varchar(300) not null,
+		site_name varchar(10) not null
+	);`)
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+func create_recently_loaded_articles_table() {
+	Db := Connect_database()
+	defer Db.Close()
+	_, err := Db.Exec(`create table recently_loaded_articles (
+		pub_date timestamp not null,
+		src_link varchar(300) not null,
+		site_name varchar(10) not null
+	);`)
+	if err != nil {
+		fmt.Println(err)
+	}
+}

@@ -41,7 +41,6 @@ const minimal_args = [
   '--use-gl=swiftshader',
   '--use-mock-keychain',
 ];
-
 const blocked_domains = [
   'googlesyndication.com',
   'adservice.google.com',
