@@ -3,20 +3,20 @@ services:
 
   go_parser:
     build: ./main_parser
-    command:  /bin/sh -c "ls && cd main_parser && rm -r -f parser && go build . && ./parser"
+    command:  /bin/sh -c "ls && cd main_parser && go mod tidy && rm -r -f parser && go build . && ./parser"
     volumes: 
       - .:/go_parser
     depends_on:
-      - js_parser
+      # - js_parser
       - db
 
-  js_parser:
-    build: ./js_rendering
-    command: bash -c "ls && cd js_rendering && node main.js"
-    ports:
-      - 8000:8000
-    volumes: 
-      - .:/js_parser
+  # js_parser:
+  #   build: ./js_rendering
+  #   command: bash -c "ls && cd js_rendering && node main.js"
+  #   ports:
+  #     - 8000:8000
+  #   volumes: 
+  #     - .:/js_parser
 
   db:
     image: 'postgres:13.0-alpine'
