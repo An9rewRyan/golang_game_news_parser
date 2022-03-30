@@ -6,17 +6,15 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"parser/config"
 	"parser/root_structs"
 	"regexp"
 	"strings"
 
 	"github.com/antchfx/htmlquery"
-	"github.com/tebeka/selenium"
 	"golang.org/x/net/html"
 )
 
-func Get_js_genetated_page_node(link string) string {
+func Get_js_genetated_page(link string) string {
 	values := map[string]string{"link": link}
 	jsonValue, _ := json.Marshal(values)
 	resp, err := http.Post("http://js_parser:8000", "application/json", bytes.NewBuffer(jsonValue))
@@ -28,31 +26,6 @@ func Get_js_genetated_page_node(link string) string {
 		fmt.Println(err)
 	}
 	return string(bodyBytes)
-}
-
-func Get_js_genetated_page(link string) string {
-	selenium.SetDebug(true)
-	service, err := selenium.NewSeleniumService(config.Selenium_path, config.Selenium_port, config.Selenium_opts...)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer service.Stop()
-	caps := selenium.Capabilities{"browserName": "firefox"}
-	wd, err := selenium.NewRemote(caps, fmt.Sprintf("http://localhost:%d/wd/hub", config.Selenium_port))
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	defer wd.Quit()
-	if err := wd.Get(link); err != nil {
-
-		panic(err)
-	}
-	page, err := wd.PageSource()
-	if err != nil {
-		fmt.Println(err)
-	}
-	return page
 }
 
 func Add_domain_name(link string, site_paths root_structs.Article_paths) string {
