@@ -55,7 +55,7 @@ func Connect_database() *sql.DB {
 	return db
 }
 
-func create_articles_table() {
+func Create_articles_table() {
 	Db := Connect_database()
 	defer Db.Close()
 	_, err := Db.Exec(`create table articles (
@@ -72,7 +72,7 @@ func create_articles_table() {
 	}
 }
 
-func create_recently_loaded_articles_table() {
+func Create_recently_loaded_articles_table() {
 	Db := Connect_database()
 	defer Db.Close()
 	_, err := Db.Exec(`create table recently_loaded_articles (

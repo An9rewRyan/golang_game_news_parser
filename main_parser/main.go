@@ -11,8 +11,8 @@ import (
 
 func main() {
 	//uncomment when launching for first time and comment again afterwards
-	// utils.create_articles_table()
-	// utils.create_recently_loaded_articles_table()
+	// utils.Create_articles_table()
+	// utils.Create_recently_loaded_articles_table()
 
 	for {
 		site_paths := []root_structs.Article_paths{
@@ -30,5 +30,3 @@ func main() {
 		time.Sleep(config.Sleep_time * time.Minute)
 	}
 }
-
-//to do: handle i/o timeout error

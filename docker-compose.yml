@@ -12,7 +12,7 @@ services:
 
   js_parser:
     build: ./js_rendering
-    command: bash -c "ls && cd js_rendering && node main.js"
+    command: bash -c "ls && cd js_rendering && ls && node main.js"
     ports:
       - 8000:8000
     volumes: 

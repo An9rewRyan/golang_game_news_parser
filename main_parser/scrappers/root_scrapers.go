@@ -77,9 +77,9 @@ func Get_articles(site_link string, site_paths root_structs.Article_paths) []roo
 		}
 	}()
 	//reducing channel capacity, because js rendering server has troubles with concurrency (yet)
-	if site_paths.Use_js_generated_pages {
-		Channel = make(chan int, 1)
-	}
+	// if site_paths.Use_js_generated_pages {
+	// 	Channel = make(chan int, 1)
+	// }
 	for {
 		if amount_of_retries == config.MAX_amount_of_loading_retries {
 			panic("1000") //status code for max retries while loading links

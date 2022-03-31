@@ -1,28 +1,27 @@
 {
-  "name": "js_rendering",
+  "name": "js_parser",
   "version": "1.0.0",
-  "description": "use for render js generated pages",
+  "description": "Definetly best js renderer",
   "main": "main.js",
-  "dependencies": {
-    "express": "^4.17.3",
-    "puppeteer": "^13.5.1",
-    "puppeteer-cluster": "^0.23.0"
-  },
-  "devDependencies": {},
   "scripts": {
     "test": "node main.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/MichaelJGoldberg/golang_game_news_parser.git"
+    "url": "git+https://github.com/An9rewRyan/golang_games_prices_parser.git"
   },
   "keywords": [
     "cool"
   ],
-  "author": "albertwesker",
+  "author": "Andrew Ryan",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/MichaelJGoldberg/golang_game_news_parser/issues"
+    "url": "https://github.com/An9rewRyan/golang_games_prices_parser/issues"
   },
-  "homepage": "https://github.com/MichaelJGoldberg/golang_game_news_parser#readme"
+  "homepage": "https://github.com/An9rewRyan/golang_games_prices_parser#readme",
+  "dependencies": {
+    "express": "^4.17.3",
+    "puppeteer": "^13.5.2",
+    "chrome-aws-lambda": "^10.0.0"
+  }
 }
