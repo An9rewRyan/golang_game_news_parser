@@ -21,7 +21,6 @@
   "homepage": "https://github.com/An9rewRyan/golang_games_prices_parser#readme",
   "dependencies": {
     "express": "^4.17.3",
-    "puppeteer": "^13.5.2",
-    "chrome-aws-lambda": "^10.0.0"
+    "puppeteer": "^13.5.2"
   }
 }

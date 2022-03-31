@@ -3,7 +3,6 @@ const puppeteer = require("puppeteer");
 const path = require("path");
 const common = require("./common.js");
 const fs = require('fs');
-const chromium = require("chrome-aws-lambda");
 
 async function launch_chrome () {
     console.log("Launching chrome")
