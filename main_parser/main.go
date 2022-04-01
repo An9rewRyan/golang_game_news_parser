@@ -24,7 +24,9 @@ func main() {
 			sites_structs.Get_igrm_paths(),
 		}
 		config.Wg_main.Add(len(site_paths))
+		// workerChan := make(chan *root_structs.Worker, len(site_paths)*2)
 		for _, site_path := range site_paths {
+			// wk := &root_structs.worker{id: i}
 			go scrappers.Get_articles(site_path.Site_link, site_path)
 		}
 		config.Wg_main.Wait()

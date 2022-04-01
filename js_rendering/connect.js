@@ -19,7 +19,7 @@ async function launch () {
           console.log(`exec error: ${error}`);
       }
   });
-  await new Promise(resolve => setTimeout(resolve, 4000)) //lets wait 10 seconds, just in case
+  await new Promise(resolve => setTimeout(resolve, 5000)) //lets wait 10 seconds, just in case
 }
 
 async function getSettings() {
@@ -58,7 +58,7 @@ async function connect () {
   } catch (e) {
     console.log("Error!: "+e)
     const err = e.error || e;
-    if (err.code === "ECONNREFUSED") {
+    // if (err.code === "ECONNREFUSED") {
       console.log("connection refused");
       await launch();
       settings = await getSettings();
@@ -69,7 +69,7 @@ async function connect () {
       }catch (e) {
       console.log("Error: "+e)
       }
-    }
+    // }
     // console.log("Errorn: "+e)
   }
   console.log("browser connected!")

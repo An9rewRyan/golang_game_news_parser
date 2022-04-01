@@ -15,7 +15,22 @@ import (
 )
 
 var Wg sync.WaitGroup
-var Channel = make(chan int, config.MAX_amount_of_goroutines)
+
+// var Channel = make(chan int, config.MAX_amount_of_goroutines)
+
+type Worker struct {
+	Link string `json:"link"`
+	Err  error  `json:"err"`
+}
+
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
 
 func Get_links(site_link string, site_paths root_structs.Article_paths) []string {
 	fmt.Println("Getting links for" + site_link)
@@ -68,11 +83,10 @@ func Get_links(site_link string, site_paths root_structs.Article_paths) []string
 
 func Get_articles(site_link string, site_paths root_structs.Article_paths) []root_structs.Article {
 	var articles []root_structs.Article
-
 	amount_of_retries := 0
 	links := Get_links(site_link, site_paths)
 	//it means that there are no new articles
-	fmt.Println(links)
+	fmt.Println("links:", links)
 	if len(links) != 0 {
 		if links[0] == "no new links" {
 			config.Wg_main.Done()
@@ -84,8 +98,9 @@ func Get_articles(site_link string, site_paths root_structs.Article_paths) []roo
 			fmt.Printf("(GA) Failed to load links for %s, tried for %d times. The link xpath is probably wrong.\n", site_link, amount_of_retries)
 			fmt.Println(err)
 		}
+		fmt.Println("Ending get articles process for " + site_paths.Site_alias)
+		config.Wg_main.Done()
 	}()
-	defer config.Wg_main.Done()
 	//reducing channel capacity, because js rendering server has troubles with concurrency (yet)
 	// if site_paths.Use_js_generated_pages {
 	// 	Channel = make(chan int, 1)
@@ -104,27 +119,66 @@ func Get_articles(site_link string, site_paths root_structs.Article_paths) []roo
 		}
 	}
 	Wg.Add(len(links))
+	workerChan := make(chan *Worker, len(links))
+	// var used_links []string
 	for _, link := range links {
-		Channel <- 1
-		go Get_article(link, site_paths)
+		// Channel <- 1
+		wk := &Worker{Link: link}
+		go wk.Get_article(link, site_paths, workerChan)
 	}
+	passed := 0
+	for passed != 2 {
+		fmt.Println("The channel for "+site_paths.Site_alias+" len is: ", len(Channel), "Channel is ", Channel)
+		wk := <-workerChan
+		fmt.Println("Wk is: ")
+		fmt.Println(wk)
+		// if !contains(used_links, wk.Link) {
+		// 	used_links = append(used_links, wk.Link)
+		if wk.Err == nil {
+			passed++
+		} else {
+			wk.Err = nil
+			fmt.Println("Got failed job, from " + wk.Link + ", retrying")
+			go wk.Get_article(wk.Link, site_paths, workerChan)
+		}
+	}
+	fmt.Println("Articles for " + site_paths.Site_alias + " are loaded, but wait group is still not activated")
 	Wg.Wait()
+
+	fmt.Println("Sucessfully loaded articles for " + site_paths.Site_alias)
 	return articles
 }
 
-func Get_article(link string, site_paths root_structs.Article_paths) root_structs.Article {
+func (wk *Worker) Get_article(link string, site_paths root_structs.Article_paths, workerChan chan<- *Worker) root_structs.Article {
+	fmt.Println(wk.Link, wk.Err)
 	amount_of_retries := 0
 	var article_html *html.Node
 	var article root_structs.Article
 	var err error
 	defer func() {
-		if err := recover(); err != nil {
-			fmt.Printf("(GA1) Failed to load source for %s, tried for %d times. The link xpath is probably wrong.\n", link, amount_of_retries)
-			fmt.Println(err)
-			<-Channel
+		if r := recover(); r != nil {
+			fmt.Println("had troubles with article " + link)
+			wk.Err = fmt.Errorf("Panic happened with %v", r)
+			fmt.Println("Sending job back to loader ")
+			fmt.Println("Wk: ")
+			fmt.Println(wk)
+		} else {
+			// wk.Err = err
+			fmt.Println("sucessfully loaded article " + link)
+			// <-Channel
 			Wg.Done()
 		}
+		workerChan <- wk
 	}()
+	// defer func() {
+	// 	if err := recover(); err != nil {
+	// 		fmt.Printf("(GA1) Failed to load source for %s, tried for %d times. The link xpath is probably wrong.\n", link, amount_of_retries)
+	// 		fmt.Println(err)
+	// 		// config.Exited_links = append(config.Exited_links, link)
+	// 		<-Channel
+	// 		Wg.Done()
+	// 	}
+	// }()
 
 	if site_paths.Use_js_generated_pages {
 		article_plain := utils.Get_js_genetated_page(link)
@@ -163,6 +217,7 @@ func Get_article(link string, site_paths root_structs.Article_paths) root_struct
 	}
 	amount_of_retries = 0
 	for len(article.Title) == 0 || len(article.Content) == 0 || len(article.Pub_date) == 0 {
+		fmt.Println(article.Title, article.Content, article.Pub_date)
 		if amount_of_retries == config.MAX_amount_of_loading_retries {
 			error_data := "1001"
 			fmt.Println(error_data)
@@ -194,10 +249,8 @@ func Get_article(link string, site_paths root_structs.Article_paths) root_struct
 		time.Sleep(config.Article_loading_retry_time * time.Millisecond)
 	}
 	article = formatters.Format_article(article, site_paths)
+	fmt.Println("Going to load: "+link+" to db", amount_of_retries)
 	utils.Write_article_to_db(article)
-
-	<-Channel
-	Wg.Done()
 
 	return article
 }
