@@ -29,13 +29,17 @@ func Get_links(site_link string, site_paths root_structs.Article_paths) []string
 		page, err = htmlquery.Parse(strings.NewReader(page_html))
 		if err != nil {
 			fmt.Println("error 1!")
+			fmt.Println("error: ")
 			fmt.Println(err)
+			return links //let get_articles function to handle this
 		}
 	} else {
 		page, err = htmlquery.LoadURL(site_link)
 		if err != nil {
 			fmt.Println("error 2!")
+			fmt.Println("error: ")
 			fmt.Println(err)
+			return links //let get_articles function to handle this
 		}
 	}
 	links_hex := htmlquery.Find(page, site_paths.Links_xpath)
@@ -72,7 +76,7 @@ func Get_articles(site_link string, site_paths root_structs.Article_paths) []roo
 	}
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Printf("Failed to load links for %s, tried for %d times. The link xpath is probably wrong.\n", site_link, amount_of_retries)
+			fmt.Printf("(GA) Failed to load links for %s, tried for %d times. The link xpath is probably wrong.\n", site_link, amount_of_retries)
 			fmt.Println(err)
 		}
 	}()
@@ -108,7 +112,7 @@ func Get_article(link string, site_paths root_structs.Article_paths) root_struct
 	var err error
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Printf("Failed to load source for %s, tried for %d times. The link xpath is probably wrong.\n", link, amount_of_retries)
+			fmt.Printf("(GA1) Failed to load source for %s, tried for %d times. The link xpath is probably wrong.\n", link, amount_of_retries)
 			fmt.Println(err)
 			<-Channel
 			Wg.Done()

@@ -10,7 +10,7 @@ const common = require("./common");
 // const delay = ms => new Promise(res => setTimeout(res, ms));
 
 async function launch () {
-    console.log("spawning!")
+  console.log("spawning!")
   const child = exec('node chrome_launcher.js',
   (error, stdout, stderr) => {
       console.log(`stdout: ${stdout}`);
@@ -19,7 +19,7 @@ async function launch () {
           console.log(`exec error: ${error}`);
       }
   });
-  await new Promise(resolve => setTimeout(resolve, 10000)) //lets wait 5 seconds
+  await new Promise(resolve => setTimeout(resolve, 10000)) //lets wait 10 seconds, just in case
 }
 
 async function getSettings() {
@@ -39,7 +39,7 @@ async function getSettings() {
 
 async function connect () {
 //   if (browser) return browser;
-  await launch()
+  // await launch()
   let settings = await getSettings()
   settings = JSON.parse(settings)
 //   console.log(settings)
@@ -58,12 +58,17 @@ async function connect () {
     console.log(e)
     const err = e.error || e;
     if (err.code === "ECONNREFUSED") {
-      console.log("con ref");
+      console.log("connection refused");
       await launch();
       settings = await getSettings();
       settings = JSON.parse(settings)
       settings = settings.wsEndpoint
+      console.log(settings)
+      try{
       browser = await puppeteer.connect({browserWSEndpoint: settings});
+      }catch (e) {
+      console.log("Error: "+e)
+      }
     }
   }
   console.log("browser: "+browser)

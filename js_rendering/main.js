@@ -16,7 +16,7 @@ async function get_js_rendered_page (link) {
 
     let bodyHTML = await page.evaluate(() => document.documentElement.outerHTML);
     
-    await browser.close();
+    // await browser.close();
     return bodyHTML;
 }
 
