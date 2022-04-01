@@ -72,8 +72,10 @@ func Get_articles(site_link string, site_paths root_structs.Article_paths) []roo
 	amount_of_retries := 0
 	links := Get_links(site_link, site_paths)
 	//it means that there are no new articles
+	fmt.Println(links)
 	if len(links) != 0 {
 		if links[0] == "no new links" {
+			config.Wg_main.Done()
 			return articles
 		}
 	}
