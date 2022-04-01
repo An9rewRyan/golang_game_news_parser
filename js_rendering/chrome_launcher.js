@@ -13,6 +13,7 @@ async function launch_chrome () {
         devtools: false,
         defaultViewport: {width: 1200, height: 1000},
         userDataDir: common.userDataDir,
+        // slowMo: 250, 
         // executablePath: "./node_modules/puppeteer/.local-chromium/linux-970485/chrome-linux",
     };
     const browser = await puppeteer.launch(launch_options);

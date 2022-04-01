@@ -68,11 +68,14 @@ func Get_links(site_link string, site_paths root_structs.Article_paths) []string
 
 func Get_articles(site_link string, site_paths root_structs.Article_paths) []root_structs.Article {
 	var articles []root_structs.Article
+
 	amount_of_retries := 0
 	links := Get_links(site_link, site_paths)
 	//it means that there are no new articles
-	if links[0] == "no new links" {
-		return articles
+	if len(links) != 0 {
+		if links[0] == "no new links" {
+			return articles
+		}
 	}
 	defer func() {
 		if err := recover(); err != nil {
@@ -80,6 +83,7 @@ func Get_articles(site_link string, site_paths root_structs.Article_paths) []roo
 			fmt.Println(err)
 		}
 	}()
+	defer config.Wg_main.Done()
 	//reducing channel capacity, because js rendering server has troubles with concurrency (yet)
 	// if site_paths.Use_js_generated_pages {
 	// 	Channel = make(chan int, 1)
@@ -109,6 +113,7 @@ func Get_articles(site_link string, site_paths root_structs.Article_paths) []roo
 func Get_article(link string, site_paths root_structs.Article_paths) root_structs.Article {
 	amount_of_retries := 0
 	var article_html *html.Node
+	var article root_structs.Article
 	var err error
 	defer func() {
 		if err := recover(); err != nil {
@@ -135,6 +140,7 @@ func Get_article(link string, site_paths root_structs.Article_paths) root_struct
 	for utils.Get_element_by_xpath(article_html, site_paths.Error_code_xpath, "text") == site_paths.Error_message {
 		if amount_of_retries == config.MAX_amount_of_loading_retries {
 			error_data := "1001"
+			fmt.Println(error_data)
 			panic(error_data) //status code for max retries while loading article
 		}
 		if site_paths.Use_js_generated_pages {
@@ -153,13 +159,37 @@ func Get_article(link string, site_paths root_structs.Article_paths) root_struct
 		fmt.Println("retrying to get: " + link)
 		time.Sleep(config.Article_loading_retry_time * time.Millisecond)
 	}
-	var article = root_structs.Article{
-		Title:       utils.Get_element_by_xpath(article_html, site_paths.Title_xpath, "title"),
-		Content:     utils.Get_element_by_xpath(article_html, site_paths.Content_xpath, "content"),
-		Image_url:   utils.Get_element_by_xpath(article_html, site_paths.Image_url_xpath, "image"),
-		Pub_date:    utils.Get_element_by_xpath(article_html, site_paths.Pub_date_xpath, "pub_date"),
-		Source_link: link,
-		Site_alias:  site_paths.Site_alias,
+	amount_of_retries = 0
+	for len(article.Title) == 0 || len(article.Content) == 0 || len(article.Pub_date) == 0 {
+		if amount_of_retries == config.MAX_amount_of_loading_retries {
+			error_data := "1001"
+			fmt.Println(error_data)
+			panic(error_data) //status code for max retries while loading article
+		}
+		// fmt
+		if site_paths.Use_js_generated_pages {
+			article_plain := utils.Get_js_genetated_page(link)
+			article_html, err = htmlquery.Parse(strings.NewReader(article_plain))
+			if err != nil {
+				fmt.Println(err)
+			}
+		} else {
+			article_html, err = htmlquery.LoadURL(link)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+		article = root_structs.Article{
+			Title:       utils.Get_element_by_xpath(article_html, site_paths.Title_xpath, "title"),
+			Content:     utils.Get_element_by_xpath(article_html, site_paths.Content_xpath, "content"),
+			Image_url:   utils.Get_element_by_xpath(article_html, site_paths.Image_url_xpath, "image"),
+			Pub_date:    utils.Get_element_by_xpath(article_html, site_paths.Pub_date_xpath, "pub_date"),
+			Source_link: link,
+			Site_alias:  site_paths.Site_alias,
+		}
+		amount_of_retries++
+		fmt.Println("retrying to get: "+link+" for ", amount_of_retries)
+		time.Sleep(config.Article_loading_retry_time * time.Millisecond)
 	}
 	article = formatters.Format_article(article, site_paths)
 	utils.Write_article_to_db(article)

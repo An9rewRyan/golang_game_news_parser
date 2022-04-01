@@ -19,7 +19,7 @@ async function launch () {
           console.log(`exec error: ${error}`);
       }
   });
-  await new Promise(resolve => setTimeout(resolve, 10000)) //lets wait 10 seconds, just in case
+  await new Promise(resolve => setTimeout(resolve, 4000)) //lets wait 10 seconds, just in case
 }
 
 async function getSettings() {
@@ -53,9 +53,10 @@ async function connect () {
   }
   console.log("Settings: "+settings)
   try {
+    console.log("connecting to browser")
     browser = await puppeteer.connect({browserWSEndpoint: settings});
   } catch (e) {
-    console.log(e)
+    console.log("Error!: "+e)
     const err = e.error || e;
     if (err.code === "ECONNREFUSED") {
       console.log("connection refused");
@@ -63,15 +64,15 @@ async function connect () {
       settings = await getSettings();
       settings = JSON.parse(settings)
       settings = settings.wsEndpoint
-      console.log(settings)
       try{
       browser = await puppeteer.connect({browserWSEndpoint: settings});
       }catch (e) {
       console.log("Error: "+e)
       }
     }
+    // console.log("Errorn: "+e)
   }
-  console.log("browser: "+browser)
+  console.log("browser connected!")
   return browser;
 }
 

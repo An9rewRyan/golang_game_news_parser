@@ -1,5 +1,7 @@
 package config
 
+import "sync"
+
 const MAX_amount_of_goroutines = 5
 
 //in millisecokonds
@@ -14,3 +16,4 @@ const Sleep_time = 10
 
 //
 var MAX_amount_of_loading_retries = 10 //not a constant beacause of use in error formatting
+var Wg_main sync.WaitGroup

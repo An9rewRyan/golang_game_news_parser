@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"parser/config"
 	"parser/root_structs"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/antchfx/htmlquery"
 	"golang.org/x/net/html"
@@ -17,9 +19,21 @@ import (
 func Get_js_genetated_page(link string) string {
 	values := map[string]string{"link": link}
 	jsonValue, _ := json.Marshal(values)
-	resp, err := http.Post("http://js_parser:8000", "application/json", bytes.NewBuffer(jsonValue))
-	if err != nil {
-		fmt.Println(err)
+	var resp *http.Response
+	var err error
+	no_err := false
+	for no_err == false {
+		fmt.Println("Sent request to: " + link)
+		resp, err = http.Post("http://js_parser:8000", "application/json", bytes.NewBuffer(jsonValue))
+		fmt.Println("Got result from: " + link)
+		if err != nil {
+			fmt.Println(err)
+			fmt.Println("Retryng to request to js_parser with link " + link)
+			time.Sleep(config.Links_loading_retry_time * time.Millisecond)
+		} else {
+			no_err = true
+			fmt.Println(link + " loaded sucessfull!:)")
+		}
 	}
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
