@@ -72,3 +72,22 @@ func Get_element_by_xpath(page_html *html.Node, xpath string, elem_type string) 
 	elem_html := strings.Join(elems_html, "")
 	return elem_html
 }
+
+func Switch_between_common_and_js_page(link string, site_paths root_structs.Article_paths) (*html.Node, error) {
+	var article_html *html.Node
+	var err error
+	if site_paths.Use_js_generated_pages {
+		article_plain := Get_js_genetated_page(link)
+		article_html, err = htmlquery.Parse(strings.NewReader(article_plain))
+		if err != nil {
+			fmt.Println(err)
+		}
+	} else {
+		article_html, err = htmlquery.LoadURL(link)
+		if err != nil {
+			fmt.Printf("An error occured while reading htmlfile on %s \n", link)
+			fmt.Println(err)
+		}
+	}
+	return article_html, err
+}

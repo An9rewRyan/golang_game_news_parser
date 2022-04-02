@@ -16,21 +16,12 @@ import (
 
 var Wg sync.WaitGroup
 
-// var Channel = make(chan int, config.MAX_amount_of_goroutines)
-
 type Worker struct {
 	Link string `json:"link"`
 	Err  error  `json:"err"`
 }
 
-func contains(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
-}
+// var Channel = make(chan int, config.MAX_amount_of_goroutines)
 
 func Get_links(site_link string, site_paths root_structs.Article_paths) []string {
 	fmt.Println("Getting links for" + site_link)
@@ -64,7 +55,7 @@ func Get_links(site_link string, site_paths root_structs.Article_paths) []string
 	fmt.Println(links)
 	links_no_duplicates := utils.RemoveDuplicateStr(links)
 	if len(links_no_duplicates) != 0 {
-		links_no_duplicates = links_no_duplicates[0:2]
+		links_no_duplicates = links_no_duplicates[0:3]
 	}
 	fmt.Println(links_no_duplicates)
 
@@ -101,10 +92,6 @@ func Get_articles(site_link string, site_paths root_structs.Article_paths) []roo
 		fmt.Println("Ending get articles process for " + site_paths.Site_alias)
 		config.Wg_main.Done()
 	}()
-	//reducing channel capacity, because js rendering server has troubles with concurrency (yet)
-	// if site_paths.Use_js_generated_pages {
-	// 	Channel = make(chan int, 1)
-	// }
 	for {
 		if amount_of_retries == config.MAX_amount_of_loading_retries {
 			panic("1000") //status code for max retries while loading links
@@ -120,25 +107,21 @@ func Get_articles(site_link string, site_paths root_structs.Article_paths) []roo
 	}
 	Wg.Add(len(links))
 	workerChan := make(chan *Worker, len(links))
-	// var used_links []string
 	for _, link := range links {
-		// Channel <- 1
 		wk := &Worker{Link: link}
 		go wk.Get_article(link, site_paths, workerChan)
 	}
 	passed := 0
 	for passed != 2 {
-		fmt.Println("The channel for "+site_paths.Site_alias+" len is: ", len(Channel), "Channel is ", Channel)
 		wk := <-workerChan
 		fmt.Println("Wk is: ")
 		fmt.Println(wk)
-		// if !contains(used_links, wk.Link) {
-		// 	used_links = append(used_links, wk.Link)
+
 		if wk.Err == nil {
 			passed++
 		} else {
 			wk.Err = nil
-			fmt.Println("Got failed job, from " + wk.Link + ", retrying")
+			fmt.Println("Got failed job, from " + wk.Link + ", retrying...")
 			go wk.Get_article(wk.Link, site_paths, workerChan)
 		}
 	}
@@ -150,7 +133,6 @@ func Get_articles(site_link string, site_paths root_structs.Article_paths) []roo
 }
 
 func (wk *Worker) Get_article(link string, site_paths root_structs.Article_paths, workerChan chan<- *Worker) root_structs.Article {
-	fmt.Println(wk.Link, wk.Err)
 	amount_of_retries := 0
 	var article_html *html.Node
 	var article root_structs.Article
@@ -163,35 +145,17 @@ func (wk *Worker) Get_article(link string, site_paths root_structs.Article_paths
 			fmt.Println("Wk: ")
 			fmt.Println(wk)
 		} else {
-			// wk.Err = err
 			fmt.Println("sucessfully loaded article " + link)
-			// <-Channel
 			Wg.Done()
 		}
 		workerChan <- wk
 	}()
-	// defer func() {
-	// 	if err := recover(); err != nil {
-	// 		fmt.Printf("(GA1) Failed to load source for %s, tried for %d times. The link xpath is probably wrong.\n", link, amount_of_retries)
-	// 		fmt.Println(err)
-	// 		// config.Exited_links = append(config.Exited_links, link)
-	// 		<-Channel
-	// 		Wg.Done()
-	// 	}
-	// }()
 
-	if site_paths.Use_js_generated_pages {
-		article_plain := utils.Get_js_genetated_page(link)
-		article_html, err = htmlquery.Parse(strings.NewReader(article_plain))
-		if err != nil {
-			fmt.Println(err)
-		}
-	} else {
-		article_html, err = htmlquery.LoadURL(link)
-		if err != nil {
-			fmt.Println(err)
-		}
+	article_html, err = utils.Switch_between_common_and_js_page(link, site_paths)
+	if err != nil {
+		fmt.Println(err)
 	}
+
 	//checking if parser got proper response (not 404 page)
 	for utils.Get_element_by_xpath(article_html, site_paths.Error_code_xpath, "text") == site_paths.Error_message {
 		if amount_of_retries == config.MAX_amount_of_loading_retries {
@@ -199,17 +163,9 @@ func (wk *Worker) Get_article(link string, site_paths root_structs.Article_paths
 			fmt.Println(error_data)
 			panic(error_data) //status code for max retries while loading article
 		}
-		if site_paths.Use_js_generated_pages {
-			article_plain := utils.Get_js_genetated_page(link)
-			article_html, err = htmlquery.Parse(strings.NewReader(article_plain))
-			if err != nil {
-				fmt.Println(err)
-			}
-		} else {
-			article_html, err = htmlquery.LoadURL(link)
-			if err != nil {
-				fmt.Printf("An error occured while reading htmlfile on %s \n", link)
-			}
+		article_html, err = utils.Switch_between_common_and_js_page(link, site_paths)
+		if err != nil {
+			fmt.Println(err)
 		}
 		amount_of_retries++
 		fmt.Println("retrying to get: " + link)
@@ -223,18 +179,9 @@ func (wk *Worker) Get_article(link string, site_paths root_structs.Article_paths
 			fmt.Println(error_data)
 			panic(error_data) //status code for max retries while loading article
 		}
-		// fmt
-		if site_paths.Use_js_generated_pages {
-			article_plain := utils.Get_js_genetated_page(link)
-			article_html, err = htmlquery.Parse(strings.NewReader(article_plain))
-			if err != nil {
-				fmt.Println(err)
-			}
-		} else {
-			article_html, err = htmlquery.LoadURL(link)
-			if err != nil {
-				fmt.Println(err)
-			}
+		article_html, err = utils.Switch_between_common_and_js_page(link, site_paths)
+		if err != nil {
+			fmt.Println(err)
 		}
 		article = root_structs.Article{
 			Title:       utils.Get_element_by_xpath(article_html, site_paths.Title_xpath, "title"),
