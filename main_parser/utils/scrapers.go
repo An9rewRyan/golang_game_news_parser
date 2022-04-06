@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"parser/config"
+	"parser/errors"
 	"parser/root_structs"
 	"regexp"
 	"strings"
@@ -16,7 +17,7 @@ import (
 	"golang.org/x/net/html"
 )
 
-func Get_js_genetated_page(link string) string {
+func Get_js_genetated_page(link string) (string, error) {
 	values := map[string]string{"link": link}
 	jsonValue, _ := json.Marshal(values)
 	var resp *http.Response
@@ -32,14 +33,18 @@ func Get_js_genetated_page(link string) string {
 			time.Sleep(config.Links_loading_retry_time * time.Millisecond)
 		} else {
 			no_err = true
-			fmt.Println(link + " loaded sucessfull!:)")
 		}
 	}
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println(err)
 	}
-	return string(bodyBytes)
+	res_str := string(bodyBytes)
+	err = nil
+	if res_str == "Couldnt load page" {
+		err = errors.New_js_request_error("Js server returned incorrect response!")
+	}
+	return res_str, err
 }
 
 func Add_domain_name(link string, site_paths root_structs.Article_paths) string {
@@ -77,10 +82,15 @@ func Switch_between_common_and_js_page(link string, site_paths root_structs.Arti
 	var article_html *html.Node
 	var err error
 	if site_paths.Use_js_generated_pages {
-		article_plain := Get_js_genetated_page(link)
+		article_plain, err := Get_js_genetated_page(link)
+		if err != nil {
+			fmt.Println(err.Error())
+			return article_html, err
+		}
 		article_html, err = htmlquery.Parse(strings.NewReader(article_plain))
 		if err != nil {
 			fmt.Println(err)
+			return article_html, err
 		}
 	} else {
 		article_html, err = htmlquery.LoadURL(link)

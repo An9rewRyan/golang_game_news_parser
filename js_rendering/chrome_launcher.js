@@ -17,6 +17,7 @@ async function launch_chrome () {
         // executablePath: "./node_modules/puppeteer/.local-chromium/linux-970485/chrome-linux",
     };
     const browser = await puppeteer.launch(launch_options);
+    await browser.newPage()
     const wsEndpoint = browser.wsEndpoint();
     console.log("Endpoint: "+wsEndpoint)
     fs.writeFile("./fnsettings.json", JSON.stringify({wsEndpoint}, null, "  "), err => {
@@ -27,4 +28,7 @@ async function launch_chrome () {
         })
     };
 
+module.exports ={
+    launch_chrome
+}
 launch_chrome()

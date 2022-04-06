@@ -5,6 +5,7 @@ const exec = require('child_process').exec;
 const fs = require('fs').promises;
 // const readText = require("mylib/core.io.file/read-text");
 const common = require("./common");
+const chrome_launcher = require("./chrome_launcher")
 
 // let browser = null;
 // const delay = ms => new Promise(res => setTimeout(res, ms));
@@ -19,6 +20,7 @@ async function launch () {
           console.log(`exec error: ${error}`);
       }
   });
+  // await chrome_launcher.launch_chrome()
   await new Promise(resolve => setTimeout(resolve, 5000)) //lets wait 10 seconds, just in case
 }
 
@@ -43,7 +45,7 @@ async function connect () {
   let settings = await getSettings()
   settings = JSON.parse(settings)
 //   console.log(settings)
-  console.log(typeof(settings), settings.wsEndpoint)
+  console.log("typeof(settings)", settings.wsEndpoint)
   settings = settings.wsEndpoint
   if (!settings) {
     await launch();
@@ -75,6 +77,5 @@ async function connect () {
   console.log("browser connected!")
   return browser;
 }
-
 
 module.exports = connect;
