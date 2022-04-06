@@ -71,6 +71,7 @@ func Get_articles(site_link string, site_paths root_structs.Article_paths) []roo
 	fmt.Println("links:", links)
 	if len(links) != 0 {
 		if links[0] == "no new links" {
+			fmt.Println("No ne links found for ", site_paths.Site_alias)
 			config.Wg_main.Done()
 			return articles
 		}
@@ -80,9 +81,9 @@ func Get_articles(site_link string, site_paths root_structs.Article_paths) []roo
 			fmt.Println(err)
 		}
 		fmt.Println("Ending get articles process for " + site_paths.Site_alias)
-		if site_paths.Site_alias != "knb" && site_paths.Site_alias != "pgd" {
-			config.Wg_main.Done()
-		}
+		// if site_paths.Site_alias != "knb" && site_paths.Site_alias != "pgd" {
+
+		// }
 	}()
 	for {
 		if amount_of_retries == config.MAX_amount_of_loading_retries {
@@ -92,7 +93,12 @@ func Get_articles(site_link string, site_paths root_structs.Article_paths) []roo
 		time.Sleep(config.Links_loading_retry_time * time.Millisecond)
 		fmt.Printf("tryed to load %s for %d amount of times, retrying...\n", site_link, amount_of_retries)
 		links, err = Get_links(site_link, site_paths)
-		// fmt.Println(len(links), err, links[0])
+		fmt.Println(len(links), err, links)
+		if links[0] == "no new links" {
+			fmt.Println("No ne links found for ", site_paths.Site_alias)
+			config.Wg_main.Done()
+			return articles
+		}
 		if len(links) != 0 && err == nil && links[0] != "no new links" {
 			fmt.Println("Here!")
 			fmt.Println(links, err)
@@ -129,6 +135,7 @@ func Get_articles(site_link string, site_paths root_structs.Article_paths) []roo
 	Wg.Wait()
 
 	fmt.Println("Sucessfully loaded articles for " + site_paths.Site_alias)
+	config.Wg_main.Done()
 	return articles
 }
 

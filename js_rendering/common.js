@@ -22,6 +22,7 @@ const minimal_args = [
     '--disable-setuid-sandbox',
     '--disable-speech-api',
     '--disable-sync',
+    '--disable-site-isolation-trials',
     '--disable-features=site-per-process',
     '--hide-scrollbars',
     '--ignore-gpu-blacklist',
