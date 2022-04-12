@@ -21,8 +21,6 @@ type Worker struct {
 	Err  error  `json:"err"`
 }
 
-// var Channel = make(chan int, config.MAX_amount_of_goroutines)
-
 func Get_links(site_link string, site_paths root_structs.Article_paths) ([]string, error) {
 	fmt.Println("Getting links for" + site_link)
 	no_links_msg := []string{"no new links"}
@@ -44,7 +42,6 @@ func Get_links(site_link string, site_paths root_structs.Article_paths) ([]strin
 	if len(links_no_duplicates) != 0 {
 		links_no_duplicates = links_no_duplicates[0:3]
 	}
-	fmt.Println(links_no_duplicates)
 
 	for _, link := range links_no_duplicates {
 		if utils.Check_if_article_in_db(link) == false {
@@ -54,7 +51,6 @@ func Get_links(site_link string, site_paths root_structs.Article_paths) ([]strin
 	}
 	fmt.Println(new_links)
 	err = nil
-	fmt.Println("Erroor is ", err)
 	if len(links_no_duplicates) > 0 && len(new_links) == 0 { //it basically means that there are no new posts published
 		return no_links_msg, err
 	}

@@ -21,7 +21,7 @@ func main() {
 		site_paths_common := []root_structs.Article_paths{
 			sites_structs.Get_dtf_paths(),
 			sites_structs.Get_sg_paths(),
-			sites_structs.Get_vg_paths(),
+			// sites_structs.Get_vg_paths(),
 			sites_structs.Get_igrm_paths(),
 			sites_structs.Get_knb_paths(),
 			sites_structs.Get_pgd_paths(),
