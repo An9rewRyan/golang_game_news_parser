@@ -24,14 +24,7 @@
 
 **Other projects using this parser:**
  - **[Gamers Gazette](https://github.com/An9rewRyan/Gamers-Gazette)** - web platform based on this parser
- - **[Golang game prices_parser](https://github.com/An9rewRyan/golang_games_prices_parser)** - game parser which uses pattern from this one (also part of GG)
-
----
-
-Contact me if you have some questions or suggestions via:
- - Telegram: **[@Michael_J_Goldberg](https://t.me/Michael_J_Goldberg)**
- - Vk - **[vk.com/mj_the_reviewer](https://vk.com/mj_the_reviewer)**
- - Discord - **[YUUJIRO HANMA#6379](https://discordapp.com/users/389483338865311745/)**
+ - **[Frontend on react for this service](https://github.com/An9rewRyan/Gamers-Gazette-frontend-react)** - react based frontend
 
 ***
 
